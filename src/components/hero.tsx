@@ -190,7 +190,7 @@ export function Hero() {
           font-size: clamp(31px, 8.8vw, 76px); color: var(--ink);
           overflow-wrap: break-word;
         }
-        .k-h1 .g { color: var(--forest); }
+        .k-h1 .g { color: var(--emerald); }
         .k-sub { margin: 18px auto 0; font-size: clamp(14.5px, 2.1vw, 18px); line-height: 1.55; color: var(--ink-muted); max-width: 416px; }
         .k-cta { margin: 26px auto 0; display: flex; gap: 10px; justify-content: center; max-width: 440px; }
         .k-cta .btn { flex: 1 1 0; min-width: 0; }
