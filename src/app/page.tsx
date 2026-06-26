@@ -1,12 +1,13 @@
 import Link from "next/link";
-import { BESTSELLERS, PRODUCTS } from "@/lib/products";
+import { getCatalog, getBestsellers } from "@/lib/catalog/queries";
 import { ProductCard } from "@/components/product-card";
 import { FeatureCard } from "@/components/feature-card";
 import { CategoryTabs } from "@/components/category-tabs";
 import { Hero } from "@/components/hero";
 
+export const dynamic = "force-dynamic";
+
 const sectionPad = { padding: "clamp(40px, 6vw, 96px) 20px" };
-const FEATURE = PRODUCTS.find((p) => p.code === "Retatrutide")!;
 
 const PILLARS: { title: string; desc: string; icon: React.ReactNode }[] = [
   {
@@ -47,14 +48,17 @@ const PILLARS: { title: string; desc: string; icon: React.ReactNode }[] = [
   },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const products = await getCatalog();
+  const bestsellers = await getBestsellers();
+  const feature = products.find((p) => p.code === "Retatrutide")!;
   return (
     <main>
       <Hero />
 
       {/* ===================== FEATURED PRODUCT ===================== */}
       <section className="container" style={{ padding: "0 20px clamp(40px,6vw,72px)" }}>
-        <FeatureCard product={FEATURE} />
+        <FeatureCard product={feature} />
       </section>
 
       {/* ===================== TRUST STRIP ===================== */}
@@ -94,7 +98,7 @@ export default function HomePage() {
           </Link>
         </div>
         <div className="h-slider">
-          {[...BESTSELLERS].sort((a, b) => b.reviews - a.reviews).map((p) => (
+          {[...bestsellers].sort((a, b) => b.reviews - a.reviews).map((p) => (
             <div className="h-slide" key={p.code}>
               <ProductCard product={p} />
             </div>
@@ -173,7 +177,7 @@ export default function HomePage() {
               Find peptides by research goal
             </h2>
           </div>
-          <CategoryTabs />
+          <CategoryTabs products={products} />
         </div>
       </section>
 

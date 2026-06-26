@@ -1,21 +1,14 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import {
-  PRODUCTS,
-  productSlug,
-  productBySlug,
-  productDetail,
-  relatedProducts,
-} from "@/lib/products";
+import { getProductBySlug, getRelated } from "@/lib/catalog/queries";
+import { productSlug, productDetail } from "@/lib/products";
 import { ProductDetailView } from "@/components/product-detail-view";
 
-export function generateStaticParams() {
-  return PRODUCTS.map((p) => ({ slug: productSlug(p) }));
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const product = productBySlug(slug);
+  const product = await getProductBySlug(slug);
   if (!product) return { title: "Product not found — Kairo Labs" };
   const detail = productDetail(product);
   return {
@@ -27,15 +20,17 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const product = productBySlug(slug);
+  const product = await getProductBySlug(slug);
   const detail = product ? productDetail(product) : undefined;
   if (!product || !detail) notFound();
+
+  const related = await getRelated(product);
 
   return (
     <ProductDetailView
       product={product}
       detail={detail}
-      related={relatedProducts(product, 3)}
+      related={related}
     />
   );
 }

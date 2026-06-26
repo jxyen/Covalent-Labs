@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { CATEGORY_META, PRODUCTS, type Category } from "@/lib/products";
+import { CATEGORY_META, type Category, type Product } from "@/lib/products";
 import { ProductCard } from "@/components/product-card";
 
 /**
@@ -10,10 +10,10 @@ import { ProductCard } from "@/components/product-card";
  * horizontally on mobile; tapping one reveals that category's products in a
  * compact grid below — far less vertical scrolling than stacked cards.
  */
-export function CategoryTabs() {
+export function CategoryTabs({ products }: { products: Product[] }) {
   const [active, setActive] = useState<Category>(CATEGORY_META[0].name);
   const meta = CATEGORY_META.find((c) => c.name === active)!;
-  const products = PRODUCTS.filter((p) => p.category === active);
+  const filtered = products.filter((p) => p.category === active);
 
   return (
     <div>
@@ -35,7 +35,7 @@ export function CategoryTabs() {
       <p className="cat-tab-blurb">{meta.blurb}</p>
 
       <div className="cat-tab-grid">
-        {products.map((p) => (
+        {filtered.map((p) => (
           <ProductCard key={p.code} product={p} variant="catalog" />
         ))}
       </div>
