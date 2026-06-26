@@ -347,6 +347,7 @@ export type Database = {
           blurb: string | null
           category: string
           code: string
+          compare_at: number | null
           created_at: string
           featured: boolean
           id: string
@@ -366,6 +367,7 @@ export type Database = {
           blurb?: string | null
           category: string
           code: string
+          compare_at?: number | null
           created_at?: string
           featured?: boolean
           id?: string
@@ -385,6 +387,7 @@ export type Database = {
           blurb?: string | null
           category?: string
           code?: string
+          compare_at?: number | null
           created_at?: string
           featured?: boolean
           id?: string
