@@ -41,44 +41,56 @@ describe('inventory schema', () => {
 describe('inventory data layer', () => {
   it('restock increments stock and writes a restock movement', async () => {
     const { productId, sizeId } = await makeSku({ qty: 0 })
-    await restock(admin, { sizeId, qty: 50, createdBy: null })
-    const { data: inv } = await admin.from('inventory')
-      .select('quantity_on_hand').eq('size_id', sizeId).single()
-    expect(inv!.quantity_on_hand).toBe(50)
-    const moves = await listMovements(admin, sizeId)
-    expect(moves[0]).toMatchObject({ delta: 50, reason: 'restock' })
-    await admin.from('products').delete().eq('id', productId)
+    try {
+      await restock(admin, { sizeId, qty: 50, createdBy: null })
+      const { data: inv } = await admin.from('inventory')
+        .select('quantity_on_hand').eq('size_id', sizeId).single()
+      expect(inv!.quantity_on_hand).toBe(50)
+      const moves = await listMovements(admin, sizeId)
+      expect(moves[0]).toMatchObject({ delta: 50, reason: 'restock' })
+    } finally {
+      await admin.from('products').delete().eq('id', productId)
+    }
   })
 
   it('adjust applies a signed delta and stores the note', async () => {
     const { productId, sizeId } = await makeSku({ qty: 10 })
-    await adjust(admin, { sizeId, delta: -3, note: 'damaged', createdBy: null })
-    const { data: inv } = await admin.from('inventory')
-      .select('quantity_on_hand').eq('size_id', sizeId).single()
-    expect(inv!.quantity_on_hand).toBe(7)
-    const moves = await listMovements(admin, sizeId)
-    expect(moves[0]).toMatchObject({ delta: -3, reason: 'adjustment', note: 'damaged' })
-    await admin.from('products').delete().eq('id', productId)
+    try {
+      await adjust(admin, { sizeId, delta: -3, note: 'damaged', createdBy: null })
+      const { data: inv } = await admin.from('inventory')
+        .select('quantity_on_hand').eq('size_id', sizeId).single()
+      expect(inv!.quantity_on_hand).toBe(7)
+      const moves = await listMovements(admin, sizeId)
+      expect(moves[0]).toMatchObject({ delta: -3, reason: 'adjustment', note: 'damaged' })
+    } finally {
+      await admin.from('products').delete().eq('id', productId)
+    }
   })
 
   it('rejects an adjustment that would drive stock negative', async () => {
     const { productId, sizeId } = await makeSku({ qty: 2 })
-    await expect(adjust(admin, { sizeId, delta: -5, note: 'oops', createdBy: null }))
-      .rejects.toThrow()
-    const { data: inv } = await admin.from('inventory')
-      .select('quantity_on_hand').eq('size_id', sizeId).single()
-    expect(inv!.quantity_on_hand).toBe(2) // unchanged
-    expect(await listMovements(admin, sizeId)).toHaveLength(0) // ledger rolled back too
-    await admin.from('products').delete().eq('id', productId)
+    try {
+      await expect(adjust(admin, { sizeId, delta: -5, note: 'oops', createdBy: null }))
+        .rejects.toThrow()
+      const { data: inv } = await admin.from('inventory')
+        .select('quantity_on_hand').eq('size_id', sizeId).single()
+      expect(inv!.quantity_on_hand).toBe(2) // unchanged
+      expect(await listMovements(admin, sizeId)).toHaveLength(0) // ledger rolled back too
+    } finally {
+      await admin.from('products').delete().eq('id', productId)
+    }
   })
 
   it('listInventory returns joined fields and a lowStock flag', async () => {
     const { productId, sizeId, sku } = await makeSku({ qty: 1, threshold: 3 })
-    const rows = await listInventory(admin)
-    const row = rows.find((r) => r.sizeId === sizeId)
-    expect(row).toBeDefined()
-    expect(row).toMatchObject({ sku, quantityOnHand: 1, reorderThreshold: 3, lowStock: true })
-    expect(row!.productName).toBe('DA')
-    await admin.from('products').delete().eq('id', productId)
+    try {
+      const rows = await listInventory(admin)
+      const row = rows.find((r) => r.sizeId === sizeId)
+      expect(row).toBeDefined()
+      expect(row).toMatchObject({ sku, quantityOnHand: 1, reorderThreshold: 3, lowStock: true })
+      expect(row!.productName).toBe('DA')
+    } finally {
+      await admin.from('products').delete().eq('id', productId)
+    }
   })
 })
