@@ -26,7 +26,7 @@ export async function createProduct(input: ProductInput): Promise<ActionResult> 
     await supabase.from('products').delete().eq('id', product.id)
     return { ok: false, error: sErr.message }
   }
-  revalidateTag('catalog')
+  revalidateTag('catalog', 'max')
   return { ok: true, id: product.id }
 }
 
@@ -52,7 +52,7 @@ export async function updateProduct(id: string, input: ProductInput): Promise<Ac
       if (iErr) return { ok: false, error: iErr.message }
     }
   }
-  revalidateTag('catalog')
+  revalidateTag('catalog', 'max')
   return { ok: true }
 }
 
@@ -61,7 +61,7 @@ export async function setProductActive(id: string, active: boolean): Promise<Act
   const supabase = await createClient()
   const { error } = await supabase.from('products').update({ active }).eq('id', id)
   if (error) return { ok: false, error: error.message }
-  revalidateTag('catalog')
+  revalidateTag('catalog', 'max')
   return { ok: true }
 }
 
@@ -74,6 +74,19 @@ export async function deleteSize(sizeId: string): Promise<ActionResult> {
   if ((count ?? 0) <= 1) return { ok: false, error: 'A product must keep at least one size' }
   const { error } = await supabase.from('product_sizes').delete().eq('id', sizeId)
   if (error) return { ok: false, error: error.message }
-  revalidateTag('catalog')
+  revalidateTag('catalog', 'max')
   return { ok: true }
+}
+
+export async function uploadProductImage(formData: FormData): Promise<{ ok: true; url: string } | { ok: false; error: string }> {
+  await requireStaff()
+  const file = formData.get('file') as File | null
+  const code = String(formData.get('code') || 'misc')
+  if (!file) return { ok: false, error: 'No file' }
+  const supabase = await createClient()
+  const path = `${code}/${Date.now()}-${file.name}`
+  const { error } = await supabase.storage.from('product-images').upload(path, file, { upsert: true })
+  if (error) return { ok: false, error: error.message }
+  const { data } = supabase.storage.from('product-images').getPublicUrl(path)
+  return { ok: true, url: data.publicUrl }
 }
