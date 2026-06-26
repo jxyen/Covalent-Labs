@@ -21,3 +21,16 @@ at or below `reorder_threshold` should be visually highlighted to prompt action.
 - [ ] RLS respected (no service-role client in request paths)
 - [ ] Tests under `tests/` cover the data-access functions
 - [ ] Types regenerated if schema changed
+
+## Note for whoever builds this
+
+`inventory_movements.order_id` is currently a plain `uuid` with **no foreign
+key** to `orders` (it could not be added in migration `0003` because `orders`
+did not exist yet, and it was not back-filled later). When you write sale-driven
+movements, add the FK in your own migration (`0006+`) for referential integrity:
+
+```sql
+alter table public.inventory_movements
+  add constraint inventory_movements_order_id_fkey
+  foreign key (order_id) references public.orders(id) on delete set null;
+```

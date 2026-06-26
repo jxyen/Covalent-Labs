@@ -23,12 +23,14 @@ gitignored — not committed to the repo). Run it once after `npm run db:reset`:
 # 1. Use the Supabase dashboard Auth tab or supabase CLI:
 #    supabase auth admin create-user --email owner@example.com --password <pw>
 # 2. Note the returned user UUID.
-# 3. Insert into staff:
-#    INSERT INTO staff (id, email, name, role, active)
-#    VALUES ('<uuid>', 'owner@example.com', 'Owner', 'owner', true);
+# 3. The on_auth_user_created trigger has already inserted a staff row
+#    (inactive, role 'staff'). Promote it — do NOT INSERT (the row exists):
+#    UPDATE staff SET role = 'owner', active = true, full_name = 'Owner'
+#    WHERE id = '<uuid>';
 ```
 
-Alternatively use the Supabase Studio UI (Table Editor → `staff`) for the insert.
+Alternatively use the Supabase Studio UI (Table Editor → `staff`) to edit the
+auto-created row. Note: the column is `full_name`, not `name`.
 Do not reference or create a committed script for this step.
 
 ## Definition of done
