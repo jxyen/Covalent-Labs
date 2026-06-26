@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getProductBySlug, getRelated } from "@/lib/catalog/queries";
-import { productSlug, productDetail } from "@/lib/products";
+import { productDetail } from "@/lib/products";
 import { ProductDetailView } from "@/components/product-detail-view";
 
 export const dynamic = "force-dynamic";
