@@ -6,7 +6,7 @@ import ws from 'ws'
 ;(globalThis as unknown as Record<string, unknown>).WebSocket = ws
 
 import { createClient } from '@supabase/supabase-js'
-import { PRODUCTS } from '../src/lib/products'
+import { SEED_PRODUCTS } from './seed-data'
 
 // Standalone script — create the admin client directly
 // (admin.ts has `import 'server-only'` which only works under the Next.js bundler)
@@ -25,7 +25,7 @@ function skuFor(code: string, mg: string): string {
 async function main() {
   const admin = createAdminClient()
 
-  for (const p of PRODUCTS) {
+  for (const p of SEED_PRODUCTS) {
     const { data: product, error } = await admin
       .from('products')
       .upsert(
@@ -34,6 +34,7 @@ async function main() {
           image: p.image, mechanism: p.mechanism, tagline: p.tagline,
           purity: p.purity, rating: p.rating, reviews: p.reviews,
           bestseller: p.bestseller, featured: p.featured, blurb: p.blurb,
+          compare_at: p.compareAt ?? null,
         },
         { onConflict: 'code' },
       )
@@ -60,7 +61,7 @@ async function main() {
     }
   }
 
-  console.log(`Seeded ${PRODUCTS.length} products.`)
+  console.log(`Seeded ${SEED_PRODUCTS.length} products.`)
 }
 
 main().catch((e) => {
