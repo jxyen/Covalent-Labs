@@ -45,4 +45,3 @@ create trigger on_auth_user_created
 -- Explicit grants required: auto_expose_new_tables is disabled in this project
 grant all on public.staff to service_role;
 grant select, insert, update, delete on public.staff to authenticated;
-grant select on public.staff to anon;
