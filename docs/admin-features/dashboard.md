@@ -1,6 +1,6 @@
 # Dashboard — terminal brief
 
-**Route:** `src/app/admin/dashboard/page.tsx` (replace the stub)
+**Route:** `src/app/admin/page.tsx` (replace the stub — this is the `/admin` landing page)
 **Tables you own:** `orders`, `payments`
 **Access:** `requireOwner`
 
