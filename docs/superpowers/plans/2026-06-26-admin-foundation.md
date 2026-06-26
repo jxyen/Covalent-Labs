@@ -15,6 +15,8 @@
 - **Do NOT modify the public storefront** (`src/app/page.tsx`, `src/app/catalog/`, `src/components/*`, `src/lib/products.ts`). Products are *seeded from* `products.ts` into the DB; the static file stays untouched.
 - **Service-role key is server-only.** Only `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` may reach the browser. Never import `src/lib/supabase/admin.ts` from a Client Component.
 - **RLS on every table.** No table is left with RLS disabled. Anonymous access is denied everywhere.
+- **Explicit GRANTs on every new table** (this Supabase config does not auto-expose tables). After the RLS policies in each migration, grant: `grant all on public.<table> to service_role;` and `grant select, insert, update, delete on public.<table> to authenticated;`. Do **not** grant admin tables to `anon`. Follow the pattern established in `0001_staff.sql`.
+- **Test bootstrap polyfill:** `tests/setup.ts` polyfills `WebSocket` from the `ws` devDependency (Node 20 has no global `WebSocket`, which `supabase-js` needs). Leave it in place.
 - **Roles:** `owner` (sees everything incl. revenue) and `staff` (no revenue). Enum value strings exactly: `owner`, `staff`.
 - **Money columns** are `numeric(10,2)`. **IDs** are `uuid default gen_random_uuid()`. **Timestamps** are `timestamptz default now()`.
 - **Commit after every task** with a `feat:`/`chore:`/`docs:` message; end each commit message with the Co-Authored-By trailer used in this repo.
@@ -334,6 +336,11 @@ create policy "staff read sizes" on public.product_sizes
   for select using (public.is_staff());
 create policy "staff write sizes" on public.product_sizes
   for all using (public.is_staff()) with check (public.is_staff());
+
+grant all on public.products to service_role;
+grant select, insert, update, delete on public.products to authenticated;
+grant all on public.product_sizes to service_role;
+grant select, insert, update, delete on public.product_sizes to authenticated;
 ```
 
 - [ ] **Step 4: Apply + test**
@@ -422,6 +429,11 @@ create policy "staff all inventory" on public.inventory
   for all using (public.is_staff()) with check (public.is_staff());
 create policy "staff all movements" on public.inventory_movements
   for all using (public.is_staff()) with check (public.is_staff());
+
+grant all on public.inventory to service_role;
+grant select, insert, update, delete on public.inventory to authenticated;
+grant all on public.inventory_movements to service_role;
+grant select, insert, update, delete on public.inventory_movements to authenticated;
 ```
 
 - [ ] **Step 4: Apply + test**
@@ -555,6 +567,13 @@ create policy "staff all order_items" on public.order_items
   for all using (public.is_staff()) with check (public.is_staff());
 create policy "staff all payments" on public.payments
   for all using (public.is_staff()) with check (public.is_staff());
+
+grant all on public.orders to service_role;
+grant select, insert, update, delete on public.orders to authenticated;
+grant all on public.order_items to service_role;
+grant select, insert, update, delete on public.order_items to authenticated;
+grant all on public.payments to service_role;
+grant select, insert, update, delete on public.payments to authenticated;
 ```
 
 - [ ] **Step 4: Apply + test**
@@ -656,6 +675,11 @@ create policy "staff all affiliates" on public.affiliates
   for all using (public.is_staff()) with check (public.is_staff());
 create policy "staff all shipments" on public.shipments
   for all using (public.is_staff()) with check (public.is_staff());
+
+grant all on public.affiliates to service_role;
+grant select, insert, update, delete on public.affiliates to authenticated;
+grant all on public.shipments to service_role;
+grant select, insert, update, delete on public.shipments to authenticated;
 ```
 
 - [ ] **Step 4: Apply + test**
