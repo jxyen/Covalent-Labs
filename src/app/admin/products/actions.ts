@@ -22,7 +22,10 @@ export async function createProduct(input: ProductInput): Promise<ActionResult> 
   const { error: sErr } = await supabase.from('product_sizes').insert(
     v.sizes.map((s) => ({ product_id: product.id, mg: s.mg, price: s.price, sku: s.sku })),
   )
-  if (sErr) return { ok: false, error: sErr.message }
+  if (sErr) {
+    await supabase.from('products').delete().eq('id', product.id)
+    return { ok: false, error: sErr.message }
+  }
   revalidateTag('catalog')
   return { ok: true, id: product.id }
 }
@@ -42,7 +45,8 @@ export async function updateProduct(id: string, input: ProductInput): Promise<Ac
   if (error) return { ok: false, error: error.message }
   for (const s of v.sizes) {
     if (s.id) {
-      await supabase.from('product_sizes').update({ mg: s.mg, price: s.price, sku: s.sku }).eq('id', s.id)
+      const { error: uErr } = await supabase.from('product_sizes').update({ mg: s.mg, price: s.price, sku: s.sku }).eq('id', s.id)
+      if (uErr) return { ok: false, error: uErr.message }
     } else {
       const { error: iErr } = await supabase.from('product_sizes').insert({ product_id: id, mg: s.mg, price: s.price, sku: s.sku })
       if (iErr) return { ok: false, error: iErr.message }
