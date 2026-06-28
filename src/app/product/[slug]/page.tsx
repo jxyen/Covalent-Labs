@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getProductBySlug, getRelated } from "@/lib/catalog/queries";
+import { getProductBySlug, getRelated, getAccessories } from "@/lib/catalog/queries";
 import { productDetail } from "@/lib/products";
 import { ProductDetailView } from "@/components/product-detail-view";
 
@@ -24,13 +24,14 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const detail = product ? productDetail(product) : undefined;
   if (!product || !detail) notFound();
 
-  const related = await getRelated(product);
+  const [related, accessories] = await Promise.all([getRelated(product), getAccessories()]);
 
   return (
     <ProductDetailView
       product={product}
       detail={detail}
       related={related}
+      accessories={accessories}
     />
   );
 }

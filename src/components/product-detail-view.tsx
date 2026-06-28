@@ -13,16 +13,22 @@ import {
   nextVolumeTier,
   VOLUME_TIERS,
   FREE_SHIP_THRESHOLD,
-  ACCESSORIES,
-  cartLineFromProduct,
-  cartLineFromAccessory,
-  type Accessory,
+  type AccessoryIcon,
   type Product,
   type ProductDetail,
 } from "@/lib/products";
+import { itemFromProduct } from "@/lib/cart/cart";
 import { useCart } from "@/components/cart-context";
 import { ProductCard } from "@/components/product-card";
 import { AccIcon } from "@/components/accessory-icon";
+
+// Accessories are now real catalog products (migration 0009); map their code → icon kind.
+const ACC_ICON: Record<string, AccessoryIcon> = {
+  "BAC-WATER": "water",
+  SYRINGES: "syringe",
+  SWABS: "swab",
+  VIALS: "vial",
+};
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -37,10 +43,12 @@ export function ProductDetailView({
   product,
   detail,
   related,
+  accessories,
 }: {
   product: Product;
   detail: ProductDetail;
   related: Product[];
+  accessories: Product[];
 }) {
   const { add, justAdded } = useCart();
   const [sizeIdx, setSizeIdx] = useState(0);
@@ -139,7 +147,7 @@ export function ProductDetailView({
               <span>{qty}</span>
               <button aria-label="Increase quantity" onClick={() => setQty((q) => Math.min(99, q + 1))}>+</button>
             </div>
-            <button className="btn btn-emerald pdp-add" style={{ fontSize: 15.5, padding: "15px 18px" }} onClick={() => add(cartLineFromProduct(product, size.mg, qty))}>
+            <button className="btn btn-emerald pdp-add" style={{ fontSize: 15.5, padding: "15px 18px" }} onClick={() => add(itemFromProduct(product, sizeIdx, qty))}>
               {added ? "✓ Added to cart" : (
                 <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
                   Add to cart
@@ -251,16 +259,16 @@ export function ProductDetailView({
       <Section title="Complete your order">
         <p className="pdp-block" style={{ margin: "-4px 0 16px" }}>Everything you need to reconstitute and run your research, added in one tap.</p>
         <div className="pdp-acc-row">
-          {ACCESSORIES.map((a: Accessory) => (
+          {accessories.map((a) => (
             <div className="pdp-acc" key={a.code}>
-              <span className="pdp-acc-ic"><AccIcon kind={a.icon} /></span>
+              <span className="pdp-acc-ic"><AccIcon kind={ACC_ICON[a.code] ?? "vial"} /></span>
               <div className="pdp-acc-meta">
                 <div className="nm">{a.name}</div>
                 <div className="sb">{a.sub}</div>
               </div>
               <div className="pdp-acc-buy">
-                <span className="pr">{formatUSD(a.price)}</span>
-                <button className="pdp-acc-add" onClick={() => add(cartLineFromAccessory(a))}>
+                <span className="pr">{formatUSD(a.sizes[0].price)}</span>
+                <button className="pdp-acc-add" onClick={() => add(itemFromProduct(a, 0))}>
                   {justAdded === a.code ? "✓ Added" : "+ Add"}
                 </button>
               </div>
@@ -313,7 +321,7 @@ export function ProductDetailView({
             ))}
           </div>
           <div style={{ marginTop: 18 }}>
-            <button className="btn btn-dark" style={{ fontSize: 14.5, padding: "13px 22px" }} onClick={() => related.forEach((r) => add(cartLineFromProduct(r, r.sizes[0].mg, 1)))}>
+            <button className="btn btn-dark" style={{ fontSize: 14.5, padding: "13px 22px" }} onClick={() => related.forEach((r) => add(itemFromProduct(r, 0)))}>
               + Add all {related.length} to cart
             </button>
           </div>
