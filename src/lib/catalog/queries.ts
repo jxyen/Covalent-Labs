@@ -11,14 +11,14 @@ type Row = {
   purity: string | null; rating: number | null; reviews: number | null
   bestseller: boolean; featured: boolean; blurb: string | null
   compare_at: number | null
-  product_sizes: { mg: string; price: number }[]
+  product_sizes: { id: string; mg: string; price: number }[]
 }
 
 function toProduct(r: Row): Product {
   const category = r.category as Category
   const sizes: SizeOption[] = [...r.product_sizes]
     .sort((a, b) => a.price - b.price)
-    .map((s) => ({ mg: s.mg, price: Number(s.price) }))
+    .map((s) => ({ id: s.id, mg: s.mg, price: Number(s.price) }))
   return {
     code: r.code, name: r.name, sub: r.sub ?? '', category,
     image: r.image ?? '', mechanism: r.mechanism ?? '', tagline: r.tagline ?? '',
@@ -33,13 +33,26 @@ async function fetchCatalog(): Promise<Product[]> {
   const supabase = createPublicClient()
   const { data, error } = await supabase
     .from('products')
-    .select('code,name,sub,category,image,mechanism,tagline,purity,rating,reviews,bestseller,featured,blurb,compare_at,product_sizes(mg,price)')
+    .select('code,name,sub,category,image,mechanism,tagline,purity,rating,reviews,bestseller,featured,blurb,compare_at,product_sizes(id,mg,price)')
     .eq('active', true)
+    .eq('is_accessory', false)
   if (error) throw error
   return (data as Row[]).map(toProduct)
 }
 
 export const getCatalog = unstable_cache(fetchCatalog, ['catalog'], { tags: ['catalog'], revalidate: 3600 })
+
+async function fetchAccessories(): Promise<Product[]> {
+  const supabase = createPublicClient()
+  const { data, error } = await supabase
+    .from('products')
+    .select('code,name,sub,category,image,mechanism,tagline,purity,rating,reviews,bestseller,featured,blurb,compare_at,product_sizes(id,mg,price)')
+    .eq('active', true)
+    .eq('is_accessory', true)
+  if (error) throw error
+  return (data as Row[]).map(toProduct)
+}
+export const getAccessories = unstable_cache(fetchAccessories, ['accessories'], { tags: ['catalog'], revalidate: 3600 })
 
 export async function getProductBySlug(slug: string): Promise<Product | undefined> {
   return (await getCatalog()).find((p) => productSlug(p) === slug)

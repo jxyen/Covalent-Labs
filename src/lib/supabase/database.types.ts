@@ -267,6 +267,45 @@ export type Database = {
           },
         ]
       }
+      payment_accounts: {
+        Row: {
+          active: boolean
+          created_at: string
+          display_name: string
+          handle: string
+          id: string
+          instructions: string | null
+          method: Database["public"]["Enums"]["payment_method"]
+          qr_path: string | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          display_name?: string
+          handle: string
+          id?: string
+          instructions?: string | null
+          method: Database["public"]["Enums"]["payment_method"]
+          qr_path?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          display_name?: string
+          handle?: string
+          id?: string
+          instructions?: string | null
+          method?: Database["public"]["Enums"]["payment_method"]
+          qr_path?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       payments: {
         Row: {
           amount: number
@@ -352,6 +391,7 @@ export type Database = {
           featured: boolean
           id: string
           image: string | null
+          is_accessory: boolean
           mechanism: string | null
           name: string
           purity: string | null
@@ -372,6 +412,7 @@ export type Database = {
           featured?: boolean
           id?: string
           image?: string | null
+          is_accessory?: boolean
           mechanism?: string | null
           name: string
           purity?: string | null
@@ -392,6 +433,7 @@ export type Database = {
           featured?: boolean
           id?: string
           image?: string | null
+          is_accessory?: boolean
           mechanism?: string | null
           name?: string
           purity?: string | null
@@ -489,8 +531,27 @@ export type Database = {
         }
         Returns: undefined
       }
+      get_order_for_payment: {
+        Args: { p_order_number: string }
+        Returns: {
+          created_at: string
+          order_number: string
+          payment_method: Database["public"]["Enums"]["payment_method"]
+          payment_status: Database["public"]["Enums"]["payment_status"]
+          status: Database["public"]["Enums"]["order_status"]
+          total: number
+        }[]
+      }
       is_owner: { Args: never; Returns: boolean }
       is_staff: { Args: never; Returns: boolean }
+      place_order: {
+        Args: {
+          p_customer: Json
+          p_items: Json
+          p_payment_method: Database["public"]["Enums"]["payment_method"]
+        }
+        Returns: Json
+      }
     }
     Enums: {
       affiliate_status: "active" | "inactive"
