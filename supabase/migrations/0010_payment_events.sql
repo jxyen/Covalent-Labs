@@ -156,3 +156,21 @@ end;
 $$;
 
 grant execute on function public.ingest_payment_event(jsonb) to service_role;
+
+-- Staff one-tap: apply a reviewed event to a chosen order.
+create or replace function public.apply_payment_event(p_event_id uuid, p_order_number text)
+returns text
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_order_id uuid;
+begin
+  select id into v_order_id from public.orders where order_number = p_order_number;
+  if v_order_id is null then raise exception 'unknown order: %', p_order_number; end if;
+  return public.mark_order_paid(v_order_id, p_event_id);
+end;
+$$;
+
+grant execute on function public.apply_payment_event(uuid, text) to service_role;

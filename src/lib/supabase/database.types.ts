@@ -306,6 +306,65 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_events: {
+        Row: {
+          amount: number
+          candidate_orders: string[] | null
+          channel: string
+          created_at: string
+          dedup_key: string
+          external_id: string | null
+          id: string
+          matched_order_id: string | null
+          method: Database["public"]["Enums"]["payment_method"]
+          note: string | null
+          raw_text: string
+          received_at: string
+          sender: string | null
+          status: Database["public"]["Enums"]["payment_event_status"]
+        }
+        Insert: {
+          amount: number
+          candidate_orders?: string[] | null
+          channel?: string
+          created_at?: string
+          dedup_key: string
+          external_id?: string | null
+          id?: string
+          matched_order_id?: string | null
+          method: Database["public"]["Enums"]["payment_method"]
+          note?: string | null
+          raw_text: string
+          received_at: string
+          sender?: string | null
+          status?: Database["public"]["Enums"]["payment_event_status"]
+        }
+        Update: {
+          amount?: number
+          candidate_orders?: string[] | null
+          channel?: string
+          created_at?: string
+          dedup_key?: string
+          external_id?: string | null
+          id?: string
+          matched_order_id?: string | null
+          method?: Database["public"]["Enums"]["payment_method"]
+          note?: string | null
+          raw_text?: string
+          received_at?: string
+          sender?: string | null
+          status?: Database["public"]["Enums"]["payment_event_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_events_matched_order_id_fkey"
+            columns: ["matched_order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payments: {
         Row: {
           amount: number
@@ -531,6 +590,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      apply_payment_event: {
+        Args: { p_event_id: string; p_order_number: string }
+        Returns: string
+      }
       get_order_for_payment: {
         Args: { p_order_number: string }
         Returns: {
@@ -542,8 +605,13 @@ export type Database = {
           total: number
         }[]
       }
+      ingest_payment_event: { Args: { p_payload: Json }; Returns: Json }
       is_owner: { Args: never; Returns: boolean }
       is_staff: { Args: never; Returns: boolean }
+      mark_order_paid: {
+        Args: { p_event_id?: string; p_order_id: string }
+        Returns: string
+      }
       place_order: {
         Args: {
           p_customer: Json
@@ -564,6 +632,7 @@ export type Database = {
         | "delivered"
         | "cancelled"
         | "refunded"
+      payment_event_status: "unmatched" | "ambiguous" | "applied" | "ignored"
       payment_method:
         | "venmo"
         | "cashapp"
@@ -717,6 +786,7 @@ export const Constants = {
         "cancelled",
         "refunded",
       ],
+      payment_event_status: ["unmatched", "ambiguous", "applied", "ignored"],
       payment_method: [
         "venmo",
         "cashapp",
