@@ -42,11 +42,24 @@ declare
   v_method public.payment_method;
   v_amount numeric(10,2);
   v_status public.payment_status;
+  v_evt_status public.payment_event_status;
+  v_evt_order uuid;
 begin
   select order_number, payment_method, total, payment_status
     into v_number, v_method, v_amount, v_status
-    from public.orders where id = p_order_id;
+    from public.orders where id = p_order_id for update;
   if v_number is null then raise exception 'unknown order: %', p_order_id; end if;
+
+  -- One event applies to at most one order: if this event was already applied
+  -- to a DIFFERENT order, refuse (stops a stale review tap from marking a
+  -- second order paid with no real payment behind it).
+  if p_event_id is not null then
+    select status, matched_order_id into v_evt_status, v_evt_order
+      from public.payment_events where id = p_event_id for update;
+    if v_evt_status = 'applied' and v_evt_order is not null and v_evt_order <> p_order_id then
+      raise exception 'payment event % already applied to order %', p_event_id, v_evt_order;
+    end if;
+  end if;
 
   if v_status = 'paid' then
     -- already paid: idempotent no-op; still link the event if one was passed.
@@ -77,6 +90,7 @@ end;
 $$;
 
 grant execute on function public.mark_order_paid(uuid, uuid) to service_role;
+revoke execute on function public.mark_order_paid(uuid, uuid) from public, anon, authenticated;
 
 -- Ingestion core: dedup → record → match (code, else amount+method+window) → maybe apply.
 create or replace function public.ingest_payment_event(p_payload jsonb)
@@ -156,6 +170,7 @@ end;
 $$;
 
 grant execute on function public.ingest_payment_event(jsonb) to service_role;
+revoke execute on function public.ingest_payment_event(jsonb) from public, anon, authenticated;
 
 -- Staff one-tap: apply a reviewed event to a chosen order.
 create or replace function public.apply_payment_event(p_event_id uuid, p_order_number text)
@@ -174,3 +189,4 @@ end;
 $$;
 
 grant execute on function public.apply_payment_event(uuid, text) to service_role;
+revoke execute on function public.apply_payment_event(uuid, text) from public, anon, authenticated;

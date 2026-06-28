@@ -21,7 +21,6 @@ function req(body: unknown, auth?: string) {
 beforeAll(() => { process.env.PAYMENT_WEBHOOK_SECRET = SECRET })
 
 let orderId: string | undefined
-let dedupKey: string | undefined
 afterAll(async () => {
   if (orderId) {
     await admin.from('payment_events').delete().eq('matched_order_id', orderId)

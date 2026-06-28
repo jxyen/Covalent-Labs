@@ -65,4 +65,25 @@ describe('apply_payment_event + payment_events RLS', () => {
     })
     expect(insErr).not.toBeNull()
   })
+
+  it('anon cannot execute the payment RPCs', async () => {
+    const r1 = await anon.rpc('mark_order_paid', { p_order_id: '00000000-0000-0000-0000-000000000000', p_event_id: null })
+    expect(r1.error).not.toBeNull()
+    const r2 = await anon.rpc('ingest_payment_event', { p_payload: { method: 'venmo', amount: 1, raw_text: 'x', dedup_key: `dk-${Math.random()}`, received_at: new Date().toISOString() } })
+    expect(r2.error).not.toBeNull()
+    const r3 = await anon.rpc('apply_payment_event', { p_event_id: '00000000-0000-0000-0000-000000000000', p_order_number: 'KL-20260628-ZZZZ' })
+    expect(r3.error).not.toBeNull()
+  })
+
+  it('refuses to apply one event to a second order', async () => {
+    const ev = await unmatchedEvent(223.55)
+    const a = await unpaidOrder(223.55)
+    const b = await unpaidOrder(223.55)
+    const first = await admin.rpc('apply_payment_event', { p_event_id: ev.id, p_order_number: a.order_number })
+    expect(first.error).toBeNull()
+    const second = await admin.rpc('apply_payment_event', { p_event_id: ev.id, p_order_number: b.order_number })
+    expect(second.error).not.toBeNull()
+    const { data: bd } = await admin.from('orders').select('payment_status').eq('id', b.id).single()
+    expect(bd!.payment_status).toBe('unpaid')
+  })
 })
