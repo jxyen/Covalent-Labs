@@ -36,7 +36,7 @@ function CartBadge({ count }: { count: number }) {
 
 export function SiteHeader() {
   const [navOpen, setNavOpen] = useState(false);
-  const { cart, openCart } = useCart();
+  const { count } = useCart();
 
   return (
     <header
@@ -58,18 +58,18 @@ export function SiteHeader() {
         </nav>
 
         <div className="show-desktop" style={{ alignItems: "center", gap: 14 }}>
-          <button type="button" onClick={openCart} aria-label="Open cart" style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: 38, height: 38, borderRadius: 10, border: "1px solid var(--hair)", background: "none", cursor: "pointer", color: "var(--ink)" }}>
+          <Link href="/cart" aria-label="View cart" style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: 38, height: 38, borderRadius: 10, border: "1px solid var(--hair)", background: "none", cursor: "pointer", color: "var(--ink)" }}>
             <CartIcon />
-            <CartBadge count={cart} />
-          </button>
+            <CartBadge count={count} />
+          </Link>
           <Link href="/catalog" className="btn btn-dark" style={{ fontSize: 14, padding: "10px 20px" }}>Shop</Link>
         </div>
 
         <div className="show-mobile" style={{ alignItems: "center", gap: 10 }}>
-          <button type="button" onClick={openCart} aria-label="Open cart" style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: 40, height: 40, borderRadius: 10, border: "1px solid var(--hair)", background: "none", cursor: "pointer", color: "var(--ink)" }}>
+          <Link href="/cart" aria-label="View cart" style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: 40, height: 40, borderRadius: 10, border: "1px solid var(--hair)", background: "none", cursor: "pointer", color: "var(--ink)" }}>
             <CartIcon />
-            <CartBadge count={cart} />
-          </button>
+            <CartBadge count={count} />
+          </Link>
           <button onClick={() => setNavOpen((o) => !o)} aria-label="Menu" aria-expanded={navOpen} style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 40, height: 40, borderRadius: 10, border: "1px solid var(--hair)", background: "none", cursor: "pointer", color: "var(--ink)" }}>
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
           </button>

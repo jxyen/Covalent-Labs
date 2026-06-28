@@ -10,7 +10,7 @@ import { useCart } from "@/components/cart-context";
  * tap away at all times (a core mobile-ecom funnel pattern).
  */
 export function MobileCtaBar() {
-  const { cart, openCart } = useCart();
+  const { count } = useCart();
   const [show, setShow] = useState(false);
 
   useEffect(() => {
@@ -29,14 +29,14 @@ export function MobileCtaBar() {
         <Link href="/catalog" className="btn btn-emerald mcta-shop">
           Shop the catalog →
         </Link>
-        <button type="button" onClick={openCart} aria-label="Open cart" className="mcta-cart" style={{ color: "var(--ink)", background: "none", cursor: "pointer" }}>
+        <Link href="/cart" aria-label="View cart" className="mcta-cart" style={{ color: "var(--ink)", background: "none", cursor: "pointer" }}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="9" cy="20" r="1.3" />
             <circle cx="18" cy="20" r="1.3" />
             <path d="M2 3h3l2.4 12.4a1.5 1.5 0 0 0 1.5 1.2h8.1a1.5 1.5 0 0 0 1.5-1.2L22 7H6" />
           </svg>
-          {cart > 0 && <span className="mcta-badge font-mono">{cart}</span>}
-        </button>
+          {count > 0 && <span className="mcta-badge font-mono">{count}</span>}
+        </Link>
       </div>
     </div>
   );

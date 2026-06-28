@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { priceDisplay, sizeDisplay, productHref, bundleSavings, cartLineFromProduct, type Product } from "@/lib/products";
+import { priceDisplay, sizeDisplay, productHref, bundleSavings, type Product } from "@/lib/products";
 import { useCart } from "@/components/cart-context";
+import { itemFromProduct } from "@/lib/cart/cart";
 
 /**
  * Compact product tile — vial cutout on the emerald gradient with mechanism
@@ -49,7 +50,7 @@ export function ProductCard({ product }: { product: Product; variant?: "featured
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              add(cartLineFromProduct(product, product.sizes[0].mg, 1));
+              add(itemFromProduct(product, 0));
             }}
             aria-label={`Add ${product.name} to cart`}
           >

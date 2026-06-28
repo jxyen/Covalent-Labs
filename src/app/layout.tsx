@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/components/cart-context";
-import { CartDrawer } from "@/components/cart-drawer";
 import { AnnouncementBar } from "@/components/announcement-bar";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -49,7 +48,6 @@ export default function RootLayout({
             <SiteFooter />
           </div>
           <MobileCtaBar />
-          <CartDrawer />
         </CartProvider>
       </body>
     </html>
