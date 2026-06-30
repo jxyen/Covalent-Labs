@@ -13,7 +13,7 @@ import { OrderSummary } from "./order-summary";
  * expands a bottom sheet with the full summary. Mirrors the cart drawer's scrim /
  * scroll-lock / Escape / inert behavior, anchored to the bottom.
  */
-export function OrderSummarySheet({ delivery }: { delivery: string }) {
+export function OrderSummarySheet({ delivery, atReview = false }: { delivery: string; atReview?: boolean }) {
   const { items, count } = useCart();
   const [open, setOpen] = useState(false);
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -21,8 +21,11 @@ export function OrderSummarySheet({ delivery }: { delivery: string }) {
   const t = orderTotals(items);
   const total = Math.round((t.merch + deliveryById(delivery).price) * 100) / 100;
 
+  // The sheet can never be open while the bar is dismissed (review step).
+  const sheetOpen = open && !atReview;
+
   useEffect(() => {
-    if (!open) return;
+    if (!sheetOpen) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(false);
     };
@@ -34,11 +37,11 @@ export function OrderSummarySheet({ delivery }: { delivery: string }) {
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = prev;
     };
-  }, [open]);
+  }, [sheetOpen]);
 
   return (
     <div className="co-sheet-wrap">
-      <button className="co-sheet-bar" type="button" onClick={() => setOpen(true)} aria-expanded={open}>
+      <button className="co-sheet-bar" type="button" data-hidden={atReview} onClick={() => setOpen(true)} aria-expanded={sheetOpen} aria-hidden={atReview} tabIndex={atReview ? -1 : 0}>
         <span className="co-sheet-bar-left">
           <span className="co-sheet-count">{count}</span>
           <span className="co-sheet-label">item{count === 1 ? "" : "s"}</span>
@@ -50,14 +53,14 @@ export function OrderSummarySheet({ delivery }: { delivery: string }) {
         </span>
       </button>
 
-      <div className="co-sheet-root" data-open={open} aria-hidden={!open}>
+      <div className="co-sheet-root" data-open={sheetOpen} aria-hidden={!sheetOpen}>
         <button
           className="co-sheet-scrim"
           aria-label="Close summary"
           onClick={() => setOpen(false)}
-          tabIndex={open ? 0 : -1}
+          tabIndex={sheetOpen ? 0 : -1}
         />
-        <div className="co-sheet-panel" role="dialog" aria-label="Order summary" aria-modal="true" inert={!open}>
+        <div className="co-sheet-panel" role="dialog" aria-label="Order summary" aria-modal="true" inert={!sheetOpen}>
           <div className="co-sheet-grab" aria-hidden="true" />
           <button ref={closeRef} className="co-sheet-srclose" aria-label="Close summary" onClick={() => setOpen(false)} />
           <div className="co-sheet-scroll">

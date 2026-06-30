@@ -954,7 +954,8 @@ h1, h2 { font-family: var(--font-display); font-weight: 700; letter-spacing: -0.
 
 /* mobile bottom sheet */
 .co-sheet-wrap { display: none; }
-.co-sheet-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 110; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 20px calc(14px + env(safe-area-inset-bottom)); background: var(--ink); color: #fff; border: none; cursor: pointer; font-family: inherit; }
+.co-sheet-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 110; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 20px calc(14px + env(safe-area-inset-bottom)); background: var(--ink); color: #fff; border: none; cursor: pointer; font-family: inherit; transition: transform .36s cubic-bezier(.4, 0, .2, 1); }
+.co-sheet-bar[data-hidden="true"] { transform: translateY(140%); pointer-events: none; }
 .co-sheet-bar-left { display: flex; align-items: center; gap: 9px; }
 .co-sheet-count { min-width: 24px; height: 24px; border-radius: 50%; background: #fff; color: var(--ink); font-size: 12.5px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
 .co-sheet-label { font-size: 14px; color: rgba(255, 255, 255, .85); }
@@ -979,11 +980,16 @@ h1, h2 { font-family: var(--font-display); font-weight: 700; letter-spacing: -0.
   .co-sheet-wrap { display: block; }
   .co-grid { padding-bottom: 88px; }
   .co-recap { grid-template-columns: 1fr; gap: 14px; }
-  .co-review-summary { display: block; }
+  .co-review-summary { display: block; animation: co-rise .42s cubic-bezier(.4, 0, .2, 1) both; }
+}
+@keyframes co-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 @media (max-width: 460px) {
   .co-row3 { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .co-sheet-scrim, .co-sheet-panel { transition: none; }
+  .co-sheet-scrim, .co-sheet-panel, .co-sheet-bar { transition: none; }
+  .co-review-summary { animation: none; }
 }

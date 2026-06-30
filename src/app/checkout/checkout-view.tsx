@@ -125,9 +125,10 @@ export function CheckoutView({ accounts }: { accounts: AccountLite[] }) {
         </div>
       </aside>
 
-      {/* On review the full summary is shown inline (mobile), so the bottom
-          sheet/bar is hidden to avoid duplication. */}
-      {current !== "review" && <OrderSummarySheet delivery={delivery} />}
+      {/* On review the full summary is shown inline (mobile); the bottom bar
+          slides away rather than unmounting, so keep it mounted and let it
+          animate out via `atReview`. */}
+      <OrderSummarySheet delivery={delivery} atReview={current === "review"} />
     </div>
   );
 }
