@@ -738,6 +738,20 @@ h1, h2 { font-family: var(--font-display); font-weight: 700; letter-spacing: -0.
 .cd-continue { width: 100%; margin-top: 10px; background: none; border: none; cursor: pointer; font-size: 13px; color: var(--ink-muted); text-decoration: underline; }
 .cd-continue:hover { color: var(--ink); }
 .cd-rou { margin: 12px 0 0; text-align: center; font-size: 10px; letter-spacing: .03em; color: var(--ink-ghost); line-height: 1.5; }
+.cd-promo-toggle { display: flex; align-items: center; gap: 9px; width: 100%; padding: 14px 20px; border: none; border-top: 1px solid var(--hair-soft); border-bottom: 1px solid var(--hair-soft); background: none; cursor: pointer; font-size: 13.5px; font-weight: 600; color: var(--ink-soft); }
+.cd-promo-toggle:hover { color: var(--ink); }
+.cd-promo { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 20px; border-top: 1px solid var(--hair-soft); border-bottom: 1px solid var(--hair-soft); }
+.cd-promo-input { flex: 1; min-width: 0; padding: 9px 12px; border: 1px solid var(--hair); border-radius: 9px; background: var(--surface-card); font-size: 13px; }
+.cd-promo-apply { flex: none; padding: 9px 16px; border: 1px solid var(--emerald-line); border-radius: 9px; background: var(--emerald-soft); color: var(--forest); font-size: 13px; font-weight: 600; cursor: pointer; }
+.cd-promo-msg { flex-basis: 100%; margin: 2px 0 0; font-size: 12px; color: var(--ink-muted); }
+.cd-pack { display: flex; align-items: center; gap: 8px; padding: 12px 20px 0; font-size: 12.5px; color: var(--ink-soft); }
+.cd-pack b { color: var(--ink); font-weight: 600; }
+.cd-pack svg { color: var(--emerald); flex: none; }
+.cd-viewcart { width: 100%; margin-top: 10px; background: none; border: none; cursor: pointer; font-size: 13px; color: var(--ink-muted); text-decoration: underline; display: inline-block; text-align: center; }
+.cd-viewcart:hover { color: var(--ink); }
+/* page variant: same content, not a fixed panel */
+.cart-page .cd-foot { position: static; border-radius: 14px; border: 1px solid var(--hair); margin-top: 18px; }
+.cart-page .cd-scroll { overflow: visible; }
 
 @media (prefers-reduced-motion: reduce) {
   .cd-scrim, .cd-panel, .cd-ship-fill { transition: none; }
