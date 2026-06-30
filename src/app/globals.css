@@ -373,14 +373,14 @@ h1, h2 { font-family: var(--font-display); font-weight: 700; letter-spacing: -0.
   scrollbar-width: none;
 }
 .h-slider::-webkit-scrollbar { display: none; }
-.h-slide { flex: 0 0 250px; max-width: 70vw; scroll-snap-align: start; }
+.h-slide { flex: 0 0 250px; width: 250px; min-width: 250px; max-width: 250px; scroll-snap-align: start; }
+.h-slide > .tile { width: 100%; max-width: 100%; }
 .h-slider-hint { display: none; margin-top: 4px; font-size: 10.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-faint); text-align: center; }
+/* Card width stays a fixed 250px at every breakpoint (capped to 70vw on small
+   phones, which preserves the "peek next card" effect). Using a viewport-%
+   basis here made cards balloon to ~430–490px on tablet widths. */
 @media (max-width: 880px) {
-  .h-slide { flex-basis: 56%; }
   .h-slider-hint { display: block; }
-}
-@media (max-width: 420px) {
-  .h-slide { flex-basis: 62%; }
 }
 
 /* ============================================================
