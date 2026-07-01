@@ -24,7 +24,9 @@ export default async function ProductsPage() {
         <tbody>
           {(products ?? []).map((p) => {
             const prices = p.product_sizes.map((s) => Number(s.price))
-            const range = prices.length ? `$${Math.min(...prices)}–$${Math.max(...prices)}` : '—'
+            const min = Math.min(...prices)
+            const max = Math.max(...prices)
+            const range = prices.length ? (min === max ? `$${min}` : `$${min}–$${max}`) : '—'
             return (
               <tr key={p.id} className="border-t border-black/10">
                 <td className="py-2 font-medium">{p.name} <span className="text-black/40">{p.code}</span></td>
