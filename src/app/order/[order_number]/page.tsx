@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import { getOrderForPayment } from "@/lib/orders/queries";
 import { getPaymentAccountForMethod } from "@/lib/payments/accounts";
+import { paymentDeepLink } from "@/lib/payments/payment-links";
+import { paymentQrSvg } from "@/lib/payments/qr";
 import { formatUSD } from "@/lib/products";
 import { CopyButton } from "@/components/copy-button";
 import { PaymentStatusWatcher } from "./payment-status";
@@ -16,6 +18,12 @@ export default async function OrderPage({ params }: { params: Promise<{ order_nu
   if (!order) notFound();
   const account = await getPaymentAccountForMethod(order.paymentMethod);
   const label = LABELS[order.paymentMethod] ?? order.paymentMethod;
+
+  // QR precedence: an uploaded image (e.g. a bank's Zelle QR) wins; otherwise
+  // auto-generate one from the handle for Cash App / Venmo, amount prefilled.
+  const uploadedQr = account?.qrUrl ?? null;
+  const payUrl = account ? paymentDeepLink(order.paymentMethod, account.handle, order.total) : null;
+  const generatedQrSvg = !uploadedQr && payUrl ? await paymentQrSvg(payUrl) : null;
 
   const codeSection = (
     <section style={{ border: "1px solid var(--hair)", borderRadius: 12, padding: 20, marginBottom: 16, textAlign: "center" }}>
@@ -33,11 +41,21 @@ export default async function OrderPage({ params }: { params: Promise<{ order_nu
   const pendingBody = (
     <section style={{ border: "1px solid var(--hair)", borderRadius: 12, padding: 20 }}>
       <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12 }}>{label} Payment Details</h2>
-      {account?.qrUrl && (
+      {uploadedQr ? (
         <div style={{ textAlign: "center", marginBottom: 12 }}>
-          <Image src={account.qrUrl} alt={`${label} QR`} width={180} height={180} unoptimized />
+          <Image src={uploadedQr} alt={`${label} QR`} width={180} height={180} unoptimized />
         </div>
-      )}
+      ) : generatedQrSvg ? (
+        <div style={{ textAlign: "center", marginBottom: 12 }}>
+          <div
+            role="img"
+            aria-label={`${label} payment QR code`}
+            style={{ display: "inline-block", width: 176, height: 176 }}
+            dangerouslySetInnerHTML={{ __html: generatedQrSvg }}
+          />
+          <div style={{ fontSize: 12, color: "var(--ink-muted)", marginTop: 6 }}>Scan to open {label}</div>
+        </div>
+      ) : null}
       <Line label={`Send ${label} to`} value={account?.handle ?? "—"} copy={account?.handle} />
       <Line label="Amount to send" value={formatUSD(order.total)} copy={String(order.total)} />
       <div style={{ marginTop: 14, padding: 12, borderRadius: 8, background: "rgba(245, 200, 66, 0.12)", border: "1px solid rgba(245,200,66,0.4)", fontSize: 13 }}>
